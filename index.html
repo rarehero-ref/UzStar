@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xizmatlar</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</head>
+<body>
+
+    <div id="loading-screen" class="page active">
+        <lottie-player src="loading.json" background="transparent" speed="1" style="width: 200px; height: 200px;" loop autoplay></lottie-player>
+    </div>
+
+    <div id="transition-loader" class="page">
+        <lottie-player src="loading.json" background="transparent" speed="1" style="width: 150px; height: 150px;" loop autoplay></lottie-player>
+        <p>O'tilmoqda...</p>
+    </div>
+
+    <div id="main-menu" class="page">
+        <div class="menu-container">
+            <div class="menu-button" id="btn-goto-stars">
+                STARS OLISH
+            </div>
+            <div class="menu-button" id="btn-goto-premium">
+                PREMIUM OLISH
+            </div>
+        </div>
+        
+        <div class="footer-animation">
+            <lottie-player src="footer-anim.json" background="transparent" speed="1" style="width: 100%; height: 150px;" loop autoplay></lottie-player>
+        </div>
+    </div>
+
+    <div id="stars-page" class="page">
+        <button class="back-btn" data-target="main-menu">&lt; Orqaga</button>
+        <h2>Stars Olish</h2>
+        <div class="form-group">
+            <label for="username">Username kiriting</label>
+            <input type="text" id="username" placeholder="@username">
+        </div>
+        <div class="form-group">
+            <label for="stars-amount">Nechta stars kerak?</label>
+            <input type="number" id="stars-amount" placeholder="Minimum 50" min="50">
+        </div>
+        <div class="form-group">
+            <label for="stars-payment-type">To'lov turini tanlang</label>
+            <select id="stars-payment-type">
+                <option value="">Tanlang...</option>
+                <option value="humo">Humo</option>
+                <option value="stars">Stars orqali</option>
+            </select>
+        </div>
+        <div id="stars-info" class="info-box"></div>
+        <button id="submit-stars-order" class="submit-btn" disabled>Buyurtma berish</button>
+    </div>
+
+    <div id="premium-page" class="page">
+        <button class="back-btn" data-target="main-menu">&lt; Orqaga</button>
+        <h2>Premium Olish</h2>
+        <div class="premium-options">
+            <div class="premium-option" data-plan="3" data-price="190000">
+                <strong>3 oylik</strong>
+                <span>190,000 UZS</span>
+            </div>
+            <div class="premium-option" data-plan="6" data-price="235000">
+                <strong>6 oylik</strong>
+                <span>235,000 UZS</span>
+            </div>
+            <div class="premium-option" data-plan="12" data-price="396000">
+                <strong>12 oylik</strong>
+                <span>396,000 UZS</span>
+            </div>
+        </div>
+        
+        <div id="premium-payment-section" class="hidden">
+            <hr>
+            <h3>To'lov usuli</h3>
+            <div class="form-group">
+                <label for="premium-payment-type">To'lov turini tanlang</label>
+                <select id="premium-payment-type">
+                    <option value="">Tanlang...</option>
+                    <option value="humo">Humo</option>
+                    <option value="stars">Stars orqali</option>
+                </select>
+            </div>
+            <div id="premium-info" class="info-box"></div>
+        </div>
+    </div>
+
+    <div id="humo-payment-page" class="page">
+        <button class="back-btn" data-target="previous">&lt; Orqaga</button>
+        <h2>To'lov ma'lumotlari</h2>
+        <p>Iltimos, to'lovni aniq miqdorda amalga oshiring. Bu sizning to'lovingizni tasdiqlash uchun kerak.</p>
+        <div class="payment-details">
+            <div><strong>Karta raqami:</strong> <code id="humo-card">9860 2466 0203 3937</code></div>
+            <div><strong>Qabul qiluvchi:</strong> <span id="humo-name">Sardor Jorayev</span></div>
+            <div class="total-amount-box">
+                <strong>To'lov miqdori:</strong>
+                <h3 id="payment-amount-display">... UZS</h3>
+            </div>
+        </div>
+        <button id="btn-payment-done" class="submit-btn">To'lov qildim</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
