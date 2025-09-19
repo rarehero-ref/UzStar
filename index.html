@@ -2,104 +2,118 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xizmatlar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Stars & Premium Xizmatlari</title>
+    
+    <!-- Tashqi stillar faylini ulash -->
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="antialiased">
 
+    <!-- Yuklanish Ekrani -->
     <div id="screen-loading" class="screen active">
-        <div id="lottie-loader"></div>
-        <p>Yuklanmoqda...</p>
+        <div id="lottie-loader" class="lottie-container"></div>
+        <p class="text-slate-400">Yuklanmoqda...</p>
     </div>
 
+    <!-- Asosiy Menyu Ekrani -->
     <div id="screen-main" class="screen">
-        <div class="main-menu">
-            <button id="btn-goto-stars" class="menu-button">
-                <span>STARS OLISH</span>
-            </button>
-            <button id="btn-goto-premium" class="menu-button">
-                <span>PREMIUM OLISH</span>
-            </button>
+        <div class="main-content">
+            <h1 class="title-text gradient-text">Xizmatni Tanlang</h1>
+            <div class="main-menu">
+                <button id="btn-goto-stars" class="menu-button glass-effect">
+                    <span>⭐️ STARS OLISH</span>
+                </button>
+                <button id="btn-goto-premium" class="menu-button glass-effect">
+                    <span>💎 PREMIUM OLISH</span>
+                </button>
+            </div>
         </div>
-        <div id="lottie-footer" class="footer-animation"></div>
+        <div id="lottie-footer" class="lottie-footer-container"></div>
     </div>
 
+    <!-- Stars Olish Ekrani -->
     <div id="screen-stars" class="screen">
-        <button class="back-button" data-target="screen-main">← Orqaga</button>
-        <h2>Stars Olish</h2>
-        <form id="stars-form">
-            <div class="form-group">
-                <label for="username">Username kiriting</label>
-                <input type="text" id="username" placeholder="@sizning_username" required>
-            </div>
-            <div class="form-group">
-                <label for="stars_amount">Nechta stars kerak?</label>
-                <input type="number" id="stars_amount" min="50" placeholder="Minimum 50" required>
-            </div>
-            <div class="form-group">
-                <label for="stars_payment">To'lov turini tanlang</label>
-                <select id="stars_payment" required>
-                    <option value="" disabled selected>To'lov usulini tanlang...</option>
-                    <option value="Humo">Humo</option>
-                    <option value="Stars">Stars orqali</option>
-                </select>
-            </div>
-            
-            <div id="stars-payment-details" class="payment-details">
+        <div class="card glass-effect">
+            <button class="back-button" data-target="screen-main">← Orqaga</button>
+            <h2 class="card-title">Stars Olish</h2>
+            <form id="stars-form" class="card-form">
+                <div class="form-group">
+                    <label for="username">Username kiriting</label>
+                    <input type="text" id="username" placeholder="@sizning_username" required>
                 </div>
-
-            <button type="submit" class="submit-button">Buyurtma Berish</button>
-        </form>
+                <div class="form-group">
+                    <label for="stars_amount">Nechta stars kerak?</label>
+                    <input type="number" id="stars_amount" min="50" placeholder="Minimum 50" required>
+                </div>
+                <div class="form-group">
+                    <label for="stars_payment">To'lov turini tanlang</label>
+                    <select id="stars_payment" required>
+                        <option value="" disabled selected>To'lov usulini tanlang...</option>
+                        <option value="Humo">💳 Humo</option>
+                        <option value="Stars">⭐️ Stars orqali</option>
+                    </select>
+                </div>
+                <div id="stars-payment-details" class="payment-details hidden"></div>
+                <button type="submit" class="submit-button glow-effect">Buyurtma Berish</button>
+            </form>
+        </div>
     </div>
     
+    <!-- Premium Olish Ekrani -->
     <div id="screen-premium" class="screen">
-        <button class="back-button" data-target="screen-main">← Orqaga</button>
-        <h2>Premium Olish</h2>
-        <div class="premium-options">
-            <div class="premium-option" data-plan="3 oylik" data-price-uzs="190000">
-                <h3>3 oylik</h3>
-                <p>190,000 UZS</p>
-            </div>
-            <div class="premium-option" data-plan="6 oylik" data-price-uzs="235000">
-                <h3>6 oylik</h3>
-                <p>235,000 UZS</p>
-            </div>
-            <div class="premium-option" data-plan="12 oylik" data-price-uzs="396000">
-                <h3>12 oylik</h3>
-                <p>396,000 UZS</p>
-            </div>
-        </div>
-        
-        <div id="premium-payment-section" class="hidden">
-            <hr>
-            <h3>To'lov</h3>
-            <div class="form-group">
-                <label for="premium_payment">To'lov turini tanlang</label>
-                <select id="premium_payment" required>
-                    <option value="" disabled selected>To'lov usulini tanlang...</option>
-                    <option value="Humo">Humo</option>
-                    <option value="Stars">Stars orqali</option>
-                </select>
-            </div>
-            <div id="premium-payment-details" class="payment-details">
+         <div class="card glass-effect">
+            <button class="back-button" data-target="screen-main">← Orqaga</button>
+            <h2 class="card-title">Premium Olish</h2>
+            <div class="premium-options">
+                <div class="premium-option" data-plan="3 oylik" data-price-uzs="190000">
+                    <h3>3 oylik</h3><p>190,000 UZS</p>
                 </div>
-            <button id="btn-submit-premium" class="submit-button hidden">Buyurtmani Tasdiqlash</button>
+                <div class="premium-option" data-plan="6 oylik" data-price-uzs="235000">
+                    <h3>6 oylik</h3><p>235,000 UZS</p>
+                </div>
+                <div class="premium-option" data-plan="12 oylik" data-price-uzs="396000">
+                    <h3>12 oylik</h3><p>396,000 UZS</p>
+                </div>
+            </div>
+            <div id="premium-payment-section" class="hidden">
+                <hr>
+                <h3>To'lov</h3>
+                <div class="form-group">
+                    <label for="premium_payment">To'lov turini tanlang</label>
+                    <select id="premium_payment" required>
+                        <option value="" disabled selected>To'lov usulini tanlang...</option>
+                        <option value="Humo">💳 Humo</option>
+                        <option value="Stars">⭐️ Stars orqali</option>
+                    </select>
+                </div>
+                <div id="premium-payment-details" class="payment-details hidden"></div>
+                <button id="btn-submit-premium" class="submit-button glow-effect hidden">Buyurtmani Tasdiqlash</button>
+            </div>
         </div>
     </div>
 
+    <!-- Buyurtma Yuklanmoqda Ekrani -->
     <div id="screen-order-loading" class="screen">
-        <div id="lottie-order-loader"></div>
-        <p>Buyurtma yuborilmoqda...</p>
+        <div id="lottie-order-loader" class="lottie-container"></div>
+        <p class="text-slate-400">Buyurtma yuborilmoqda...</p>
     </div>
 
+    <!-- Xabar Ekrani -->
     <div id="screen-message" class="screen">
-        <h2 id="message-title"></h2>
-        <p id="message-text"></p>
-        <button id="btn-close-webapp" class="menu-button">Yopish</button>
+        <div class="card glass-effect text-center">
+            <h2 id="message-title" class="card-title"></h2>
+            <p id="message-text" class="message-text"></p>
+            <button id="btn-close-webapp" class="close-button">Yopish</button>
+        </div>
     </div>
 
-
+    <!-- Skriptlar -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <script src="app.js"></script>
