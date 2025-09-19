@@ -1,17 +1,20 @@
-// app.js
-
+// Barcha kod `DOMContentLoaded` ichida bo'lishi kerak.
+// Bu degani, HTML to'liq yuklanib bo'lgandan keyingina JS ishga tushadi.
 document.addEventListener('DOMContentLoaded', () => {
     // ----- Telegram Web App Sozlamalari -----
     const tg = window.Telegram.WebApp;
-    tg.ready(); // Ilova tayyorligini bildirish
-    tg.expand(); // Ilovani to'liq ekranga ochish
+    tg.ready(); 
+    tg.expand();
+    // Ilovaga mos ranglarni o'rnatish
+    tg.setHeaderColor('#0a0a0a');
+    tg.setBackgroundColor('#0a0a0a');
 
     // ----- Backend API manzili -----
     const API_URL = './api/order.php';
 
-    // ----- Humo ma'lumotlari (Backenddan olish yaxshiroq, lekin frontendda ham bo'lishi mumkin)
-    const HUMO_CARD = '9860 2466 0203 3937';
-    const CARD_OWNER = 'Sardor Jorayev';
+    // ----- Sozlamalar (Admin o'zgartirishi kerak) -----
+    const HUMO_CARD = '9860 1111 2222 3333'; // O'zingiznikiga almashtiring
+    const CARD_OWNER = 'ADMIN ISMI'; // O'zingiznikiga almashtiring
     const STAR_PRICE_UZS = 220; // 1 stars narxi
 
     // ----- Barcha Ekranlar va Elementlar -----
@@ -52,295 +55,150 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const premiumOptions = document.querySelectorAll('.premium-option');
-    let selectedPremiumPlan = null; // Tanlangan premium tarifni saqlash uchun
+    let selectedPremiumPlan = null;
 
     // ----- Lottie Animatsiyalari -----
-    // Sizning fayllaringiz nomini/manzilini qo'ying. Hozircha LottieFiles'dan test animatsiyalar.
-    // zip ichidagi .json faylni topib, uni serverga yuklang va yo'lini ko'rsating.
-    // Yoki CDN link ishlating.
-    
-    // Boshlang'ich yuklovchi (1757960351...2.lottie.zip)
-    const loaderAnim = lottie.loadAnimation({
-        container: document.getElementById('lottie-loader'),
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        // path: 'path/to/your/loading.json' 
-        path: 'https://assets10.lottiefiles.com/packages/lf20_p8bfn5to.json' // Placeholder
-    });
-
-    // Buyurtma yuklovchi (5 sekundlik)
-    const orderLoaderAnim = lottie.loadAnimation({
-        container: document.getElementById('lottie-order-loader'),
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        // path: 'path/to/your/loading.json' // Xuddi o'sha animatsiyani ishlatsa bo'ladi
-        path: 'https://assets10.lottiefiles.com/packages/lf20_p8bfn5to.json' // Placeholder
-    });
-    
-    // Pastdagi animatsiya (175796077...2.lottie.zip)
-    const footerAnim = lottie.loadAnimation({
-        container: document.getElementById('lottie-footer'),
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        // path: 'path/to/your/footer_stars.json'
-        path: 'https://assets2.lottiefiles.com/packages/lf20_obhph31z.json' // Placeholder (Stars)
-    });
-
+    try {
+        lottie.loadAnimation({
+            container: document.getElementById('lottie-loader'),
+            renderer: 'svg', loop: true, autoplay: true,
+            path: 'https://assets10.lottiefiles.com/packages/lf20_p8bfn5to.json'
+        });
+        lottie.loadAnimation({
+            container: document.getElementById('lottie-order-loader'),
+            renderer: 'svg', loop: true, autoplay: true,
+            path: 'https://assets10.lottiefiles.com/packages/lf20_p8bfn5to.json'
+        });
+        lottie.loadAnimation({
+            container: document.getElementById('lottie-footer'),
+            renderer: 'svg', loop: true, autoplay: true,
+            path: 'https://assets2.lottiefiles.com/packages/lf20_obhph31z.json'
+        });
+    } catch(e) { console.error("Lottie animatsiyasini yuklashda xatolik:", e); }
 
     // ----- Yordamchi Funksiyalar -----
-
-    /**
-     * Kerakli ekranni silliq tarzda ko'rsatadi
-     * @param {string} screenId Ko'rsatilishi kerak bo'lgan ekran ID'si
-     */
     function showScreen(screenId) {
-        Object.values(screens).forEach(screen => {
-            screen.classList.remove('active');
-        });
-        if (screens[screenId]) {
-            screens[screenId].classList.add('active');
-        }
+        Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
+        if (screens[screenId]) screens[screenId].classList.add('active');
     }
 
-    /**
-     * Foydalanuvchiga xabar ko'rsatish va ilovani yopish tugmasini taklif qilish
-     * @param {string} title Sarlavha
-     * @param {string} text Matn
-     */
     function showMessage(title, text) {
         display.messageTitle.textContent = title;
-        display.messageText.innerHTML = text; // HTMLni qo'llab-quvvatlash uchun
+        display.messageText.innerHTML = text;
         showScreen('message');
     }
 
-    /**
-     * Backendga buyurtmani yuborish
-     * @param {object} orderData Buyurtma ma'lumotlari
-     */
     async function sendOrderToAdmin(orderData) {
-        // 5 sekundlik animatsiyani ko'rsatish
         showScreen('orderLoading');
-
         try {
+            const userData = tg.initDataUnsafe?.user || {};
+            orderData.user_info = {
+                id: userData.id,
+                first_name: userData.first_name,
+                username: userData.username,
+            };
+
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData),
             });
-
+            
             const result = await response.json();
-
-            // 5 sekund kutish (animatsiya ko'rinishi uchun)
-            await new Promise(resolve => setTimeout(resolve, 5000));
-
+            
             if (result.status === 'success') {
-                // Muvaffaqiyatli xabar
-                let successMessage = "Buyurtmangiz qabul qilindi. Tez orada admin siz bilan bog'lanadi.";
-                
-                // Agar Humo tanlangan bo'lsa, karta raqamini ko'rsatish
+                let successMessage = `Buyurtmangiz qabul qilindi. Tez orada admin siz bilan bog'lanadi.`;
                 if (orderData.payment_method === 'Humo') {
-                    let priceText = '';
-                    if (orderData.type === 'stars') {
-                        const randomSurcharge = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
-                        const totalPrice = (orderData.stars_amount * STAR_PRICE_UZS) + randomSurcharge;
-                        priceText = `<b>${totalPrice.toLocaleString('uz-UZ')} UZS</b>`;
-                    } else if (orderData.type === 'premium') {
-                        priceText = `<b>${orderData.price}</b>`;
-                    }
-                    
-                    successMessage = `Buyurtmangiz qabul qilindi. <br><br>Iltimos, ${priceText} miqdoridagi to'lovni quyidagi karta raqamiga o'tkazing va chekni adminga yuboring:<br><br>` +
-                                     `<b>Karta:</b> <code>${HUMO_CARD}</code><br>` +
-                                     `<b>Qabul qiluvchi:</b> ${CARD_OWNER}`;
-                } else if (orderData.payment_method === 'Stars') {
-                     const totalStars = orderData.stars_amount + (orderData.stars_amount / 50 * 10);
-                     successMessage = `Buyurtmangiz qabul qilindi. <br><br>Iltimos, <b>${totalStars} Stars</b> miqdorini adminga yuboring.` +
-                                      `<br><i>(Bu jarayon avtomatlashtiriladi, hozircha qo'lda)</i>`;
+                    let priceText = result.total_price_uzs ? `<b>${result.total_price_uzs.toLocaleString('uz-UZ')} UZS</b>` : `<b>${orderData.price}</b>`;
+                    successMessage = `Buyurtmangiz qabul qilindi. <br><br>Iltimos, ${priceText} miqdorini quyidagi kartaga o'tkazing va chekni adminga yuboring:<br><br>` +
+                                     `<div style="text-align:left; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;"><b>Karta:</b> <code>${HUMO_CARD}</code><br>` +
+                                     `<b>Qabul qiluvchi:</b> ${CARD_OWNER}</div>`;
+                } else if (orderData.payment_method === 'Stars' && result.total_stars) {
+                     successMessage = `Buyurtmangiz qabul qilindi. <br><br>Iltimos, <b>${result.total_stars} Stars</b> miqdorini adminga yuboring.`;
                 }
-
                 showMessage("✅ Muvaffaqiyatli!", successMessage);
             } else {
                 throw new Error(result.message || 'Noma\'lum xatolik');
             }
-
         } catch (error) {
-            // 5 sekund kutish (agar xatolik tez yuz bersa ham)
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            showMessage("❌ Xatolik!", "Buyurtmani yuborishda xatolik yuz berdi: " + error.message);
+            console.error("Buyurtma yuborishda xato:", error);
+            showMessage("❌ Xatolik!", "Server bilan bog'lanishda xatolik yuz berdi. Iltimos, keyinroq qayta urunib ko'ring.");
         }
     }
 
-
     // ----- Voqea Tinglovchilar (Event Listeners) -----
-
-    // 1. Boshlang'ich yuklanishni yashirish (masalan, 2 sekunddan keyin)
-    setTimeout(() => {
-        showScreen('main');
-    }, 1750); // 1.75 sekund
-
-    // 2. Asosiy menyu tugmalari
+    
+    // Bosh menyu tugmalari
     buttons.gotoStars.addEventListener('click', () => showScreen('stars'));
     buttons.gotoPremium.addEventListener('click', () => showScreen('premium'));
 
-    // 3. Barcha "Orqaga" tugmalari
+    // "Orqaga" tugmalari
     buttons.back.forEach(button => {
-        button.addEventListener('click', (e) => {
-            const targetScreen = e.target.getAttribute('data-target');
-            if (targetScreen) {
-                showScreen(targetScreen.replace('screen-', ''));
-            }
-        });
+        button.addEventListener('click', (e) => showScreen(e.currentTarget.dataset.target.replace('screen-', '')));
     });
 
-    // 4. Ilovani yopish tugmasi
-    buttons.closeWebapp.addEventListener('click', () => {
-        tg.close();
-    });
+    // Ilovani yopish
+    buttons.closeWebapp.addEventListener('click', () => tg.close());
 
-    // ----- STARS OLISH MANTIQI -----
-
-    // To'lov turi o'zgarganda ma'lumotni ko'rsatish
+    // Stars formasi logikasi
     inputs.starsPayment.addEventListener('change', () => {
         const method = inputs.starsPayment.value;
         const amount = parseInt(inputs.starsAmount.value) || 0;
         let detailsHtml = '';
 
-        if (method === 'Humo') {
-            if (amount < 50) {
-                detailsHtml = `<p class="error-message">Minimum 50 stars kiriting.</p>`;
-            } else {
-                // Random qo'shimcha frontendda HISOBLANMAYDI, faqat backendda.
-                // Bu yerda taxminiy narxni ko'rsatamiz.
-                const approxPrice = (amount * STAR_PRICE_UZS);
-                detailsHtml = `<p>Siz to'lashingiz kerak bo'lgan taxminiy summa: <b>~${approxPrice.toLocaleString('uz-UZ')} UZS</b></p>` +
-                              `<p><small>(Aniq summa (kichik random qo'shimcha bilan) buyurtma berganingizdan so'ng ko'rsatiladi)</small></p>`;
-            }
-        } else if (method === 'Stars') {
-            if (amount < 50) {
-                detailsHtml = `<p class="error-message">Minimum 50 stars kiriting.</p>`;
-            } else {
-                // Har 50 stars uchun 10 stars (20% qo'shimcha)
-                const surcharge = (amount / 50) * 10;
-                const totalStars = amount + surcharge;
-                detailsHtml = `<p>Siz <b>${amount}</b> stars uchun jami <b>${totalStars} Stars</b> to'lashingiz kerak bo'ladi (<b>${surcharge}</b> stars qo'shimcha).</p>` +
-                              `<p><small>Bu to'lov avtomatik tarzda hisobingizdan yechiladi (hozircha test rejimida).</small></p>`;
-            }
-        }
+        if (amount < 50) detailsHtml = `<p style="color:#f87171;">Minimum 50 stars kiriting.</p>`;
+        else if (method === 'Humo') detailsHtml = `<p>Taxminiy summa: <b>~${(amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')} UZS</b></p>`;
+        else if (method === 'Stars') detailsHtml = `<p>Jami <b>${amount + Math.ceil(amount / 50) * 10} Stars</b> to'lashingiz kerak.</p>`;
+        
         display.starsPaymentDetails.innerHTML = detailsHtml;
         display.starsPaymentDetails.classList.toggle('hidden', detailsHtml === '');
     });
 
-    // Stars formasini yuborish
     forms.stars.addEventListener('submit', (e) => {
-        e.preventDefault(); // Sahifani yangilamaslik
-        
-        const username = inputs.username.value.replace('@', ''); // @ belgisini olib tashlash
-        const starsAmount = parseInt(inputs.starsAmount.value);
-        const paymentMethod = inputs.starsPayment.value;
-
-        if (!username || !starsAmount || !paymentMethod) {
-            tg.HapticFeedback.notificationOccurred('error');
-            alert("Barcha maydonlarni to'ldiring!");
-            return;
-        }
-
-        if (starsAmount < 50) {
-            tg.HapticFeedback.notificationOccurred('error');
-            alert("Minimum 50 stars kiriting!");
-            return;
-        }
-
-        // Ma'lumotlarni yig'ish va backendga yuborish
-        const orderData = {
+        e.preventDefault();
+        if (inputs.starsAmount.value < 50) return alert("Minimum 50 stars kiriting!");
+        sendOrderToAdmin({
             type: 'stars',
-            username: username,
-            stars_amount: starsAmount,
-            payment_method: paymentMethod,
-        };
-
-        sendOrderToAdmin(orderData);
-    });
-
-
-    // ----- PREMIUM OLISH MANTIQI -----
-
-    // Premium tarifini tanlash
-    premiumOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            // Avval barchasidan 'selected' klassini olib tashlash
-            premiumOptions.forEach(opt => opt.classList.remove('selected'));
-            
-            // Bosilganiga 'selected' klassini qo'shish
-            option.classList.add('selected');
-            
-            // Ma'lumotlarni saqlash
-            selectedPremiumPlan = {
-                plan: option.getAttribute('data-plan'),
-                price: option.getAttribute('data-price-uzs'),
-                price_formatted: option.querySelector('p').textContent
-            };
-
-            // To'lov bo'limini ko'rsatish
-            display.premiumPaymentSection.classList.remove('hidden');
-            
-            // To'lov turini qayta tanlashni majburlash
-            inputs.premiumPayment.value = ""; 
-            display.premiumPaymentDetails.classList.add('hidden');
-            buttons.submitPremium.classList.add('hidden');
-
-            tg.HapticFeedback.impactOccurred('light');
+            username: inputs.username.value.replace('@', ''),
+            stars_amount: parseInt(inputs.starsAmount.value),
+            payment_method: inputs.starsPayment.value,
         });
     });
 
-    // Premium uchun to'lov turi o'zgarganda
+    // Premium formasi logikasi
+    premiumOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            premiumOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            selectedPremiumPlan = {
+                plan: option.dataset.plan,
+                price: option.dataset.priceUzs,
+                price_formatted: option.querySelector('p').textContent
+            };
+            display.premiumPaymentSection.classList.remove('hidden');
+            inputs.premiumPayment.value = ""; 
+            display.premiumPaymentDetails.classList.add('hidden');
+            buttons.submitPremium.classList.add('hidden');
+        });
+    });
+
     inputs.premiumPayment.addEventListener('change', () => {
         const method = inputs.premiumPayment.value;
-        let detailsHtml = '';
-        let canSubmit = false;
-
-        if (method === 'Humo') {
-            detailsHtml = `<p>To'lov uchun summa: <b>${selectedPremiumPlan.price_formatted}</b></p>` +
-                          `<p><small>Buyurtmani tasdiqlaganingizdan so'ng to'lov kartasi ko'rsatiladi.</small></p>`;
-            canSubmit = true;
-        } else if (method === 'Stars') {
-            detailsHtml = `<p class="error-message">Afsuski, Stars orqali premium olish imkonsiz!</p>`;
-            canSubmit = false;
-        }
-
-        display.premiumPaymentDetails.innerHTML = detailsHtml;
+        let canSubmit = method === 'Humo';
+        display.premiumPaymentDetails.innerHTML = canSubmit ? `<p>To'lov uchun summa: <b>${selectedPremiumPlan.price_formatted}</b></p>` : `<p style="color:#f87171;">Premium uchun Stars orqali to'lov imkonsiz.</p>`;
         display.premiumPaymentDetails.classList.remove('hidden');
         buttons.submitPremium.classList.toggle('hidden', !canSubmit);
     });
     
-    // Premium buyurtmasini yuborish
     buttons.submitPremium.addEventListener('click', () => {
-        if (!selectedPremiumPlan) {
-            tg.HapticFeedback.notificationOccurred('error');
-            alert("Iltimos, avval tarifni tanlang.");
-            return;
-        }
-        
-        const paymentMethod = inputs.premiumPayment.value;
-        
-        if (paymentMethod !== 'Humo') {
-             tg.HapticFeedback.notificationOccurred('error');
-             alert("Faqat Humo orqali to'lov mumkin.");
-             return;
-        }
-        
-        // Ma'lumotlarni yig'ish va backendga yuborish
-        const orderData = {
+        sendOrderToAdmin({
             type: 'premium',
             plan: selectedPremiumPlan.plan,
             price: selectedPremiumPlan.price_formatted,
-            payment_method: paymentMethod,
-        };
-        
-        sendOrderToAdmin(orderData);
+            payment_method: inputs.premiumPayment.value,
+        });
     });
 
+    // ----- Ilovani ishga tushirish -----
+    setTimeout(() => showScreen('main'), 2000); // 2 sekunddan so'ng asosiy ekranni ko'rsatish
 });
